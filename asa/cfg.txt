@@ -1,0 +1,173 @@
+: Saved
+
+:
+: Serial Number: JAD23440VDY
+: Hardware:   ASA5506, 4096 MB RAM, CPU Atom C2000 series 1250 MHz, 1 CPU (4 cores)
+:
+ASA Version 9.8(2)
+!
+hostname OFFICE
+enable password $sha512$5000$QP+MmDwZj4Bi7IsBCN2cKg==$iISqGADPbnHz3PHyeM2Jiw== pbkdf2
+names
+
+!
+interface GigabitEthernet1/1
+ nameif outside
+ security-level 0
+ ip address dhcp
+!
+interface GigabitEthernet1/2
+ nameif inside
+ security-level 100
+ ip address 192.168.10.254 255.255.255.0
+!
+interface GigabitEthernet1/2.1
+ no vlan
+ no nameif
+ no security-level
+ ip address 192.168.11.254 255.255.255.0
+!
+interface GigabitEthernet1/3
+ no nameif
+ security-level 100
+ no ip address
+!
+interface GigabitEthernet1/4
+ no nameif
+ security-level 100
+ no ip address
+!
+interface GigabitEthernet1/5
+ no nameif
+ security-level 100
+ no ip address
+!
+interface GigabitEthernet1/6
+ no nameif
+ security-level 100
+ no ip address
+!
+interface GigabitEthernet1/7
+ no nameif
+ security-level 100
+ no ip address
+!
+interface GigabitEthernet1/8
+ no nameif
+ security-level 100
+ no ip address
+!
+interface Management1/1
+ management-only
+ no nameif
+ no security-level
+ no ip address
+!
+ftp mode passive
+same-security-traffic permit inter-interface
+object network obj_any1
+ subnet 0.0.0.0 0.0.0.0
+object network obj_any2
+ subnet 0.0.0.0 0.0.0.0
+object network obj_any3
+ subnet 0.0.0.0 0.0.0.0
+object network obj_any4
+ subnet 0.0.0.0 0.0.0.0
+object network obj_any5
+ subnet 0.0.0.0 0.0.0.0
+object network obj_any6
+ subnet 0.0.0.0 0.0.0.0
+object network obj_any7
+ subnet 0.0.0.0 0.0.0.0
+pager lines 24
+logging asdm informational
+mtu outside 1500
+mtu inside 1500
+no failover
+icmp unreachable rate-limit 1 burst-size 1
+asdm image disk0:/asdm-782.bin
+no asdm history enable
+arp timeout 14400
+no arp permit-nonconnected
+arp rate-limit 16384
+timeout xlate 3:00:00
+timeout pat-xlate 0:00:30
+timeout conn 1:00:00 half-closed 0:10:00 udp 0:02:00 sctp 0:02:00 icmp 0:00:02
+timeout sunrpc 0:10:00 h323 0:05:00 h225 1:00:00 mgcp 0:05:00 mgcp-pat 0:05:00
+timeout sip 0:30:00 sip_media 0:02:00 sip-invite 0:03:00 sip-disconnect 0:02:00
+timeout sip-provisional-media 0:02:00 uauth 0:05:00 absolute
+timeout tcp-proxy-reassembly 0:01:00
+timeout floating-conn 0:00:00
+timeout conn-holddown 0:00:15
+timeout igp stale-route 0:01:10
+user-identity default-domain LOCAL
+aaa authentication ssh console LOCAL
+aaa authentication http console LOCAL
+aaa authentication login-history
+http server enable
+http 192.168.10.0 255.255.255.0 inside
+http redirect inside 80
+no snmp-server location
+no snmp-server contact
+service sw-reset-button
+crypto ipsec security-association pmtu-aging infinite
+crypto ca trustpool policy
+telnet timeout 5
+ssh stricthostkeycheck
+ssh 192.168.10.0 255.255.255.0 inside
+ssh 192.168.10.10 255.255.255.255 inside
+ssh timeout 5
+ssh version 1
+ssh key-exchange group dh-group1-sha1
+console timeout 0
+
+dhcpd address 192.168.10.1-192.168.10.253 inside
+dhcpd enable inside
+!
+threat-detection basic-threat
+threat-detection statistics access-list
+no threat-detection statistics tcp-intercept
+ssl server-version tlsv1.2
+ssl cipher default custom "AES256-SHA:AES128-SHA:DES-CBC3-SHA"
+ssl cipher tlsv1 custom "AES256-SHA:AES128-SHA:DES-CBC3-SHA"
+ssl cipher dtlsv1 custom "AES256-SHA:AES128-SHA:DES-CBC3-SHA"
+webvpn
+ anyconnect-essentials
+ cache
+  disable
+ error-recovery disable
+dynamic-access-policy-record DfltAccessPolicy
+username cisco password $sha512$5000$L1bqwP748gRH2I5FNlM5PQ==$HhHsHAyAiBn8Wp0Dq5R5Zw== pbkdf2 privilege 15
+!
+class-map inspection_default
+ match default-inspection-traffic
+!
+!
+policy-map type inspect dns preset_dns_map
+ parameters
+  message-length maximum client auto
+  message-length maximum 512
+  no tcp-inspection
+policy-map global_policy
+ class inspection_default
+  inspect dns preset_dns_map
+  inspect ftp
+  inspect h323 h225
+  inspect h323 ras
+  inspect rsh
+  inspect rtsp
+  inspect esmtp
+  inspect sqlnet
+  inspect skinny
+  inspect sunrpc
+  inspect xdmcp
+  inspect sip
+  inspect netbios
+  inspect tftp
+  inspect ip-options
+!
+service-policy global_policy global
+prompt hostname context
+no call-home reporting anonymous
+Cryptochecksum:0ab17669740591cf12afa2ec955f1ebb
+: end
